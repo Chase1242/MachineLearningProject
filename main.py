@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from keras.preprocessing.text import Tokenizer
 from sklearn.metrics import roc_auc_score, log_loss, roc_auc_score, roc_curve, auc
 
-X, y= d.get_encoded_data()
+X, y = d.get_encoded_data()
 
 def XnumpyToTensor(x_data_np):
     X_tensor = Variable(torch.from_numpy(x_data_np).type(torch.FloatTensor)) # Note the conversion for pytorch
