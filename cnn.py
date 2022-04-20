@@ -15,28 +15,29 @@ import data_processing as d
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-KERNEL_SIZE = 5
+KERNEL_SIZE = 3
+FILTERS = 128
+DROPOUT_RATE = 0.3
+
+EPOCHS = 200 # arbitrary
 
 X, y = d.get_encoded_data()
-#y = d.get_y()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1)
 
-#y_train = d.standarize_predictions(y_train).numpy().squeeze()
-LAYERS = 52 # arbitrary number for now
-EPOCHS = 500 # arbitrary
-
-# TODO: define all the testing data
-
 def getModel():
-    # all three layers are arbitrarily chosen, don't know input shape
     return keras.Sequential(
         [
-            layers.Conv1D(64, KERNEL_SIZE, padding='same', activation='relu', name="layer0", input_shape=X_train.shape[1:]),
-            layers.Dropout(.3),
-            layers.Conv1D(64, KERNEL_SIZE, padding='same', activation='relu', name="layer1"),
-            layers.Dropout(.3),
-            layers.Conv1D(64, KERNEL_SIZE, activation='relu', padding='same'),
+            layers.Conv1D(FILTERS, KERNEL_SIZE, padding='same', activation='relu', name="layer1", input_shape=X_train.shape[1:]),
+            layers.LeakyReLU(),
+            layers.Dropout(DROPOUT_RATE),
+            layers.Conv1D(FILTERS / 2, KERNEL_SIZE, padding='same', activation='relu', name="layer2"),
+            layers.LeakyReLU(),
+            layers.Dropout(DROPOUT_RATE),
+            layers.Conv1D(FILTERS / 4, KERNEL_SIZE, padding='same', activation='relu', name="layer3"),
+            layers.LeakyReLU(),
+            layers.Dropout(DROPOUT_RATE),
+            # layers.Conv1D(FILTERS, KERNEL_SIZE, padding='same', activation='relu', name="layer4"),
             layers.Dense(13, activation='softmax', name='output_layer')
         ])
 
@@ -60,12 +61,11 @@ if __name__ == '__main__':
     X_train = X_train.astype(np.float32)
     y_train = y_train.astype(np.float32)
     
-    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
     
     # for i in train_dataset:
     #     print(i)
     model = getModel()
-    optimizer = keras.optimizers.Adam(learning_rate=1e-5)
+    optimizer = keras.optimizers.Nadam(learning_rate=1e-3, decay=5e-4)
    
     model.compile(optimizer, 'mse', metrics=[keras.metrics.Accuracy(),
                                                 # keras.metrics.Precision(), 
