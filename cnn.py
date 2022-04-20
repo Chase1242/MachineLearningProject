@@ -15,6 +15,7 @@ import data_processing as d
 from sklearn.model_selection import train_test_split
 import numpy as np
 
+KERNEL_SIZE = 5
 
 X, y = d.get_encoded_data()
 #y = d.get_y()
@@ -31,11 +32,11 @@ def getModel():
     # all three layers are arbitrarily chosen, don't know input shape
     return keras.Sequential(
         [
-            layers.Conv1D(128, 10, padding='same', activation='relu', name="layer0", input_shape=X_train.shape[1:]),
+            layers.Conv1D(64, KERNEL_SIZE, padding='same', activation='relu', name="layer0", input_shape=X_train.shape[1:]),
             layers.Dropout(.3),
-            layers.Conv1D(64, 10, padding='same', activation='relu', name="layer1"),
+            layers.Conv1D(64, KERNEL_SIZE, padding='same', activation='relu', name="layer1"),
             layers.Dropout(.3),
-            layers.Conv1D(64, 10, activation='relu', padding='same'),
+            layers.Conv1D(64, KERNEL_SIZE, activation='relu', padding='same'),
             layers.Dense(13, activation='softmax', name='output_layer')
         ])
 
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     model = getModel()
     optimizer = keras.optimizers.Adam(learning_rate=1e-5)
    
-    model.compile(optimizer, 'binary_crossentropy', metrics=[keras.metrics.Accuracy(),
+    model.compile(optimizer, 'mse', metrics=[keras.metrics.Accuracy(),
                                                 # keras.metrics.Precision(), 
                                                 # keras.metrics.Recall()
                                                 ])
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     history = model.fit(
         X_train,
         y_train,
-        batch_size=64,
+        batch_size=32,
         epochs=EPOCHS
     )
    
